@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,17 +9,18 @@ datasource db {
 }
 
 model Store {
-  id         String      @id @default(uuid())
+  id         String        @id @default(uuid())
   name       String
   userId     String
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  billboards Billboard[] @relation("StoreToBillboard")
-  categories Category[]  @relation("StoreToCategory")
-  colours    Colour[]    @relation("StoreToColour")
-  sizes      Size[]      @relation("StoreToSize")
-  products   Product[]   @relation("StoreToProduct")
-  orders     Order[]     @relation("StoreToOrder")
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  billboards Billboard[]   @relation("StoreToBillboard")
+  categories Category[]    @relation("StoreToCategory")
+  colours    Colour[]      @relation("StoreToColour")
+  sizes      Size[]        @relation("StoreToSize")
+  products   Product[]     @relation("StoreToProduct")
+  orders     Order[]       @relation("StoreToOrder")
+  hires      ProductHire[] @relation("StoreToHire")
 }
 
 model Billboard {
@@ -80,28 +78,44 @@ model Colour {
 }
 
 model Product {
-  id         String      @id @default(uuid())
-  storeId    String
-  store      Store       @relation("StoreToProduct", fields: [storeId], references: [id])
-  categoryId String
-  category   Category    @relation("CategoryToProduct", fields: [categoryId], references: [id])
-  name       String
-  price      Decimal
-  isFeatured Boolean     @default(false)
-  isArchived Boolean     @default(false)
-  sizeId     String
-  size       Size        @relation(fields: [sizeId], references: [id])
-  colourId   String
-  colour     Colour      @relation(fields: [colourId], references: [id])
-  images     Image[]
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  orderItems OrderItem[]
+  id           String        @id @default(uuid())
+  storeId      String
+  store        Store         @relation("StoreToProduct", fields: [storeId], references: [id])
+  categoryId   String
+  category     Category      @relation("CategoryToProduct", fields: [categoryId], references: [id])
+  name         String
+  price        Decimal
+  isFeatured   Boolean       @default(false)
+  isArchived   Boolean       @default(false)
+  sizeId       String
+  size         Size          @relation(fields: [sizeId], references: [id])
+  colourId     String
+  colour       Colour        @relation(fields: [colourId], references: [id])
+  images       Image[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  orderItems   OrderItem[]
+  productHires ProductHire[]
+  quantity     Int           @default(1) // Quantity of the product
 
   @@index([storeId])
   @@index([categoryId])
   @@index([sizeId])
   @@index([colourId])
+}
+
+model ProductHire {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+  storeId   String
+  store     Store    @relation("StoreToHire", fields: [storeId], references: [id])
+  hireDate  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@index([storeId])
 }
 
 model Image {
@@ -116,15 +130,18 @@ model Image {
 }
 
 model Order {
-  id         String      @id @default(uuid())
-  storeId    String
-  store      Store       @relation("StoreToOrder", fields: [storeId], references: [id])
-  orderItems OrderItem[]
-  isPaid     Boolean     @default(false)
-  phone      String      @default("")
-  address    String      @default("")
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  storeId        String
+  store          Store       @relation("StoreToOrder", fields: [storeId], references: [id])
+  orderItems     OrderItem[]
+  isPaid         Boolean     @default(false)
+  phone          String      @default("")
+  address        String      @default("")
+  eventDate      DateTime
+  dropoffAddress String      @default("")
+  isPickup       Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   @@index([storeId])
 }

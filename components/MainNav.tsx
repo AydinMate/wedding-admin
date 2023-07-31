@@ -43,6 +43,11 @@ export function MainNav({
       active: pathname.startsWith(`/${params.storeId}/products`),
     },
     {
+      href: `/${params.storeId}/hires`,
+      label: "Hires",
+      active: pathname.startsWith(`/${params.storeId}/hires`),
+    },
+    {
       href: `/${params.storeId}/orders`,
       label: "Orders",
       active: pathname.startsWith(`/${params.storeId}/orders`),

@@ -52,8 +52,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       toast({
         variant: "destructive",
         title: "Uh oh.",
-        description:
-          "Something went wrong.",
+        description: "Something went wrong. (app/(dashboard)/[storeId]/(routes)/products/components/cell-action.tsx)",
       });
     } finally {
       setLoading(false);

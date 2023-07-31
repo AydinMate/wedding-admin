@@ -73,7 +73,7 @@ export const StoreModal = () => {
                       <Input
                         disabled={loading}
                         autoComplete="off"
-                        placeholder="E-Commerce"
+                        placeholder="Melbourne"
                         {...field}
                       />
                     </FormControl>

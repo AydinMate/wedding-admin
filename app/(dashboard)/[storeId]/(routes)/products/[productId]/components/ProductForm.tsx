@@ -118,8 +118,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       toast({
         variant: "destructive",
         title: "Uh oh.",
-        description: "Something went wrong.",
+        description: "Something went wrong. Please make sure you have provided an image.",
       });
+
     } finally {
       setLoading(false);
     }
