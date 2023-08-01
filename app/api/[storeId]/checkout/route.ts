@@ -25,7 +25,6 @@ export async function POST(
   { params }: { params: { storeId: string } }
 ) {
   const body = await req.json();
-  console.log("Incoming request body:", body);
 
   const { productHires, dropoffAddress, isDelivery, hireDate } = body;
 
