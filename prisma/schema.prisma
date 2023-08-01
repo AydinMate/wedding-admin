@@ -137,9 +137,9 @@ model Order {
   isPaid         Boolean     @default(false)
   phone          String      @default("")
   address        String      @default("")
-  eventDate      DateTime
+  hireDate       DateTime
   dropoffAddress String      @default("")
-  isPickup       Boolean     @default(false)
+  isDelivery     Boolean     @default(true)
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 

@@ -4,6 +4,12 @@ import { NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
 
+interface ProductHire {
+  productId: string;
+  hireDate: string;
+}
+
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -18,16 +24,19 @@ export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
 ) {
-  const { productIds } = await req.json();
+  const body = await req.json();
+  console.log("Incoming request body:", body);
 
-  if (!productIds || productIds.length === 0) {
-    return new NextResponse("Product ids are required", { status: 400 });
+  const { productHires, dropoffAddress, isDelivery, hireDate } = body;
+
+  if (!productHires || productHires.length === 0) {
+    return new NextResponse("Product hires are required", { status: 400 });
   }
 
   const products = await prismadb.product.findMany({
     where: {
       id: {
-        in: productIds,
+        in: productHires.map((productHire: ProductHire) => productHire.productId),
       },
     },
   });
@@ -51,17 +60,39 @@ export async function POST(
     data: {
       storeId: params.storeId,
       isPaid: false,
+      hireDate: new Date(body.hireDate), // assign hireDate to order here
+      dropoffAddress: body.dropoffAddress,
+      isDelivery: body.isDelivery,
       orderItems: {
-        create: productIds.map((productId: string) => ({
-          product: {
-            connect: {
-              id: productId,
-            },
-          },
+        create: body.productHires.map((productHire: ProductHire) => ({
+          product: { connect: { id: productHire.productId } },
         })),
       },
     },
   });
+
+  await Promise.all(
+    body.productHires.map((productHire: ProductHire) =>
+      prismadb.productHire.create({
+        data: {
+          productId: productHire.productId,
+          storeId: params.storeId,
+          hireDate: new Date(productHire.hireDate),
+        },
+      })
+    )
+  );
+
+
+
+  await prismadb.productHire.createMany({
+    data: productHires.map((productHire: ProductHire) => ({
+      productId: productHire.productId,
+      storeId: params.storeId,
+      hireDate: new Date(productHire.hireDate),
+    })),
+  });
+
 
   const session = await stripe.checkout.sessions.create({
     line_items,
