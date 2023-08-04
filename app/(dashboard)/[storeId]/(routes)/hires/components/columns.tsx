@@ -5,10 +5,10 @@ import { ColumnDef } from "@tanstack/react-table";
 export type HireColumn = {
   id: string;
   product: string;
-  createdAt: string;
-  hireDate: string
+  // createdAt: string;
+  hireDate: string;
+  isPaid: string;
 };
-
 
 export const columns: ColumnDef<HireColumn>[] = [
   {
@@ -20,7 +20,7 @@ export const columns: ColumnDef<HireColumn>[] = [
     header: "Hire Date",
   },
   {
-    accessorKey: "Created At",
-    header: "Hire Placed",
+    accessorKey: "isPaid",
+    header: "Paid",
   },
 ];

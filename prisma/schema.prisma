@@ -77,6 +77,17 @@ model Colour {
   @@index([storeId])
 }
 
+model Image {
+  id        String   @id @default(uuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
 model Product {
   id           String        @id @default(uuid())
   storeId      String
@@ -106,42 +117,36 @@ model Product {
 
 model ProductHire {
   id        String   @id @default(uuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
   productId String
   product   Product  @relation(fields: [productId], references: [id])
   storeId   String
   store     Store    @relation("StoreToHire", fields: [storeId], references: [id])
   hireDate  DateTime
+  isPaid    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([productId])
   @@index([storeId])
-}
-
-model Image {
-  id        String   @id @default(uuid())
-  productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  url       String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([productId])
+  @@index([orderId])
 }
 
 model Order {
-  id             String      @id @default(uuid())
+  id             String        @id @default(uuid())
   storeId        String
-  store          Store       @relation("StoreToOrder", fields: [storeId], references: [id])
+  store          Store         @relation("StoreToOrder", fields: [storeId], references: [id])
   orderItems     OrderItem[]
-  isPaid         Boolean     @default(false)
-  phone          String      @default("")
-  address        String      @default("")
+  isPaid         Boolean       @default(false)
+  phone          String        @default("")
+  address        String        @default("")
   hireDate       DateTime
-  dropoffAddress String      @default("")
-  isDelivery     Boolean     @default(true)
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  dropoffAddress String        @default("")
+  isDelivery     Boolean       @default(true)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  productHires   ProductHire[]
 
   @@index([storeId])
 }

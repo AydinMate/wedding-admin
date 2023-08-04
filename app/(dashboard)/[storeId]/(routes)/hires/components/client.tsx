@@ -18,7 +18,7 @@ export const HireClient: React.FC<HireClientProps> = ({ data }) => {
         description="Manage hires for your store"
       />
       <Separator />
-      <DataTable columns={columns} data={data} searchKey="products" />
+      <DataTable columns={columns} data={data} searchKey="hireDate" />
     </>
   );
 };

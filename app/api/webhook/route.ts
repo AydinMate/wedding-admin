@@ -1,47 +1,43 @@
-import Stripe from "stripe";
-import { headers } from "next/headers";
-import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
-import prismadb from "@/lib/prismadb";
+import Stripe from "stripe"
+import { headers } from "next/headers"
+import { NextResponse } from "next/server"
+
+import { stripe } from "@/lib/stripe"
+import prismadb from "@/lib/prismadb"
 
 export async function POST(req: Request) {
-  const body = await req.text();
-  console.log('Received body:', body);  // <-- Log the incoming request body
+  const body = await req.text()
+  const signature = headers().get("Stripe-Signature") as string
 
-  const signature = headers().get("Stripe-Signature") as string;
-
-  let event: Stripe.Event;
+  let event: Stripe.Event
 
   try {
     event = stripe.webhooks.constructEvent(
       body,
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
-    );
+    )
   } catch (error: any) {
-    console.error('Error constructing Stripe event:', error);  // <-- Log any errors when constructing Stripe event
-    return new NextResponse(`Webhook error: ${error.message}`, { status: 400 });
+    return new NextResponse(`Webhook Error: ${error.message}`, { status: 400 })
   }
-
-  console.log('Stripe event:', event);  // <-- Log the Stripe event
 
   const session = event.data.object as Stripe.Checkout.Session;
   const address = session?.customer_details?.address;
 
-  const addressComonents = [
+  const addressComponents = [
     address?.line1,
     address?.line2,
     address?.city,
     address?.state,
     address?.postal_code,
-    address?.country,
+    address?.country
   ];
 
-  const addressString = addressComonents.filter((c) => c !== null).join(", ");
+  const addressString = addressComponents.filter((c) => c !== null).join(', ');
 
-  console.log('Address:', addressString);  // <-- Log the constructed address
 
   if (event.type === "checkout.session.completed") {
+    console.log("Session meta data: ", session?.metadata)
     const order = await prismadb.order.update({
       where: {
         id: session?.metadata?.orderId,
@@ -49,29 +45,31 @@ export async function POST(req: Request) {
       data: {
         isPaid: true,
         address: addressString,
-        phone: session?.customer_details?.phone || "",
+        phone: session?.customer_details?.phone || '',
       },
       include: {
         orderItems: true,
-      },
+      }
     });
 
-    console.log('Order:', order);  // <-- Log the updated order
+    // const productIds = order.orderItems.map((orderItem) => orderItem.productId);
 
-    const productIds = order.orderItems.map((orderItem) => orderItem.productId);
-    console.log('Product IDs:', productIds);  // <-- Log the product IDs
-
-    await prismadb.product.updateMany({
-      where: {
-        id: {
-          in: [...productIds],
-        },
-      },
-      data: {
-        isArchived: true,
-      },
-    });
+    // await prismadb.product.updateMany({
+    //   where: {
+    //     id: {
+    //       in: [...productIds],
+    //     },
+    //   },
+    //   data: {
+    //     isArchived: true
+    //   }
+    // });
   }
-  return new NextResponse(null, { status: 200 });
-}
 
+  return new NextResponse(null, { status: 200 });
+};
+
+
+// console log: Session meta data:  { orderId: 'd867e4d1-201d-41c5-baaa-f311fe3a5665' }
+
+// link the order id to the product hire in db. link is paid to orderId.isPaid Find every product with that order id, and make the

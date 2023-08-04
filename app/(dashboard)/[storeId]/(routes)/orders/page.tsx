@@ -5,6 +5,7 @@ import { OrderClient } from "./components/client";
 import { OrderColumn } from "./components/columns";
 import { formatter } from "@/lib/utils";
 
+
 const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
   const orders = await prismadb.order.findMany({
     where: {
@@ -33,8 +34,11 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
         return total + Number(item.product.price);
       }, 0)
     ),
-    isPaid: item.isPaid,
+    isPaid: item.isPaid ? "Paid" : "Not Paid",
     createdAt: format(item.createdAt, "MMM do, yyyy"),
+    dropoffAddress: item.dropoffAddress,
+    hireDate: format(item.hireDate, 'EEE MMM dd yyyy'),
+    isDelivery: item.isDelivery ? "Delivery" : "Pickup"
   }));
 
   return (
