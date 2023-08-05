@@ -10,7 +10,7 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { productId, hireDate, isPaid } = body;
+    const { productId, hireDate, isPaid, orderId } = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
@@ -23,6 +23,10 @@ export async function POST(
     }
     if (!isPaid) {
       return new NextResponse("Is Paid is required", { status: 400 });
+    }
+
+    if (!orderId) {
+      return new NextResponse("Order Id is required", { status: 400 });
     }
 
     if (!params.storeId) {
@@ -46,6 +50,7 @@ export async function POST(
         hireDate,
         isPaid,
         storeId: params.storeId,
+        orderId,
       },
     });
 
@@ -64,7 +69,7 @@ export async function GET(
     const { searchParams } = new URL(req.url);
     const productId = searchParams.get("productId") || undefined;
     const hireDate = searchParams.get("hireDate");
-    const isPaid = searchParams.get("isPaid");
+    const isPaid = searchParams.get("isPaid") === 'true'; // Convert the string to boolean
 
     if (!params.storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
@@ -73,6 +78,8 @@ export async function GET(
     const productHires = await prismadb.productHire.findMany({
       where: {
         storeId: params.storeId,
+        ...(hireDate && { hireDate: new Date(hireDate) }), // Include hireDate in the where clause if it's provided
+        ...(isPaid !== undefined && { isPaid }), // Include isPaid in the where clause if it's provided
       },
       include: {
         product: true,
