@@ -68,29 +68,31 @@ export async function POST(
         })),
       },
     },
-  });
+});
 
-  await Promise.all(
-    body.productHires.map((productHire: ProductHire) =>
-      prismadb.productHire.create({
-        data: {
-          productId: productHire.productId,
-          storeId: params.storeId,
-          hireDate: new Date(productHire.hireDate),
-        },
-      })
-    )
-  );
+await Promise.all(
+  body.productHires.map((productHire: ProductHire) =>
+    prismadb.productHire.create({
+      data: {
+        productId: productHire.productId,
+        storeId: params.storeId,
+        hireDate: new Date(productHire.hireDate),
+        orderId: order.id, // assign the orderId here
+      },
+    })
+  )
+);
 
 
 
-  await prismadb.productHire.createMany({
-    data: productHires.map((productHire: ProductHire) => ({
-      productId: productHire.productId,
-      storeId: params.storeId,
-      hireDate: new Date(productHire.hireDate),
-    })),
-  });
+
+  // await prismadb.productHire.createMany({
+  //   data: productHires.map((productHire: ProductHire) => ({
+  //     productId: productHire.productId,
+  //     storeId: params.storeId,
+  //     hireDate: new Date(productHire.hireDate),
+  //   })),
+  // });
 
 
   const session = await stripe.checkout.sessions.create({

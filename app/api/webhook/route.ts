@@ -37,10 +37,12 @@ export async function POST(req: Request) {
 
 
   if (event.type === "checkout.session.completed") {
-    console.log("Session meta data: ", session?.metadata)
+    const orderId = session?.metadata?.orderId;
+
+    // Update the order
     const order = await prismadb.order.update({
       where: {
-        id: session?.metadata?.orderId,
+        id: orderId,
       },
       data: {
         isPaid: true,
@@ -52,7 +54,27 @@ export async function POST(req: Request) {
       }
     });
 
-    // const productIds = order.orderItems.map((orderItem) => orderItem.productId);
+    // Update the ProductHire
+    const productHire = await prismadb.productHire.updateMany({
+      where: {
+        orderId: orderId,
+      },
+      data: {
+        isPaid: true,
+      },
+    });
+}
+
+
+  return new NextResponse(null, { status: 200 });
+};
+
+
+// console log: Session meta data:  { orderId: 'd867e4d1-201d-41c5-baaa-f311fe3a5665' }
+
+// link the order id to the product hire in db. link is paid to orderId.isPaid Find every product with that order id, and make the
+
+ // const productIds = order.orderItems.map((orderItem) => orderItem.productId);
 
     // await prismadb.product.updateMany({
     //   where: {
@@ -64,12 +86,3 @@ export async function POST(req: Request) {
     //     isArchived: true
     //   }
     // });
-  }
-
-  return new NextResponse(null, { status: 200 });
-};
-
-
-// console log: Session meta data:  { orderId: 'd867e4d1-201d-41c5-baaa-f311fe3a5665' }
-
-// link the order id to the product hire in db. link is paid to orderId.isPaid Find every product with that order id, and make the
