@@ -54,7 +54,15 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(productHire);
+    // Create a new response with the productHire data
+    const res = NextResponse.json(productHire);
+
+    // Add the CORS headers to the response
+    res.headers.set('Access-Control-Allow-Origin', process.env.FRONTEND_STORE_URL!);
+    res.headers.set('Access-Control-Allow-Methods', 'GET,POST');
+    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    return res;
   } catch (error) {
     console.log("[HIRES_POST]", error);
     return new NextResponse("Internal error", { status: 500 });
@@ -90,9 +98,19 @@ export async function GET(
       },
     });
 
-    return NextResponse.json(productHires);
-  } catch (error) {
-    console.log("[PRODUCT_HIRES_GET]", error);
-    return new NextResponse("Internal error", { status: 500 });
-  }
+   // Create a new response with the productHires data
+   const res = NextResponse.json(productHires);
+
+   // Add the CORS headers to the response
+   res.headers.set('Access-Control-Allow-Origin', process.env.FRONTEND_STORE_URL!);
+   res.headers.set('Access-Control-Allow-Methods', 'GET,POST');
+   res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+   return res;
+ } catch (error) {
+   console.log("[PRODUCT_HIRES_GET]", error);
+   return new NextResponse("Internal error", { status: 500 });
+ }
 }
+
+
