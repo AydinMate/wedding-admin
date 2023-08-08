@@ -38,6 +38,7 @@ export async function POST(req: Request) {
 
   if (event.type === "checkout.session.completed") {
     const orderId = session?.metadata?.orderId;
+    console.log(orderId)
 
     // Update the order
     const order = await prismadb.order.update({

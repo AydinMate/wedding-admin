@@ -1,14 +1,17 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import { CellAction } from "./cell-action";
 
 export type HireColumn = {
   id: string;
   product: string;
-  // createdAt: string;
+  createdAt: string;
   hireDate: string;
   isPaid: string;
 };
+
+
 
 export const columns: ColumnDef<HireColumn>[] = [
   {
@@ -22,5 +25,9 @@ export const columns: ColumnDef<HireColumn>[] = [
   {
     accessorKey: "isPaid",
     header: "Paid",
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => <CellAction data={row.original} />,
   },
 ];

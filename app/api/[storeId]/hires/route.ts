@@ -79,7 +79,7 @@ export async function GET(
       where: {
         storeId: params.storeId,
         ...(hireDate && { hireDate: new Date(hireDate) }), // Include hireDate in the where clause if it's provided
-        ...(isPaid !== undefined && { isPaid }), // Include isPaid in the where clause if it's provided
+        ...(isPaid && { isPaid }), // Include isPaid in the where clause if it's true
       },
       include: {
         product: true,
@@ -88,6 +88,7 @@ export async function GET(
         createdAt: "desc",
       },
     });
+    
 
     return NextResponse.json(productHires);
   } catch (error) {
