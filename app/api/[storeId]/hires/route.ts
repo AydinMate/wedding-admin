@@ -68,7 +68,8 @@ export async function GET(
   try {
     const { searchParams } = new URL(req.url);
     const productId = searchParams.get("productId") || undefined;
-    const hireDate = searchParams.get("hireDate");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
     const isPaid = searchParams.get("isPaid") === 'true'; // Convert the string to boolean
 
     if (!params.storeId) {
@@ -78,7 +79,7 @@ export async function GET(
     const productHires = await prismadb.productHire.findMany({
       where: {
         storeId: params.storeId,
-        ...(hireDate && { hireDate: new Date(hireDate) }), // Include hireDate in the where clause if it's provided
+        ...(startDate && endDate && { hireDate: { gte: new Date(startDate), lte: new Date(endDate) } }), // Include hireDate in the where clause if both startDate and endDate are provided
         ...(isPaid && { isPaid }), // Include isPaid in the where clause if it's true
       },
       include: {
@@ -88,7 +89,6 @@ export async function GET(
         createdAt: "desc",
       },
     });
-    
 
     return NextResponse.json(productHires);
   } catch (error) {
