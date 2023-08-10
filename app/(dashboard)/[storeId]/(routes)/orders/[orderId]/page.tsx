@@ -10,6 +10,16 @@ const OrderPage = async ({
     where: {
       id: params.orderId,
     },
+    select: {
+      id: true,
+      storeId: true,
+      isPaid: true,
+      isCash: true,
+
+      hireDate: true,
+      dropoffAddress: true,
+      isDelivery: true,
+    },
   });
 
   const products = await prismadb.product.findMany({
@@ -17,23 +27,34 @@ const OrderPage = async ({
       storeId: params.storeId,
     },
     select: {
-     id: true,
-     name: true
-    }
+      id: true,
+      name: true,
+    },
   });
 
   const orderItems = await prismadb.orderItem.findMany({
     where: {
-      orderId: params.orderId
+      orderId: params.orderId,
     },
     select: {
       productId: true,
       orderId: true,
-      id: true
-    }
-  })
+      id: true,
+    },
+  });
 
-  
+  const productHires = await prismadb.productHire.findMany({
+    where: {
+      storeId: params.storeId,
+    },
+    select: {
+      productId: true,
+      hireDate: true,
+      isPaid: true,
+      isCash: true,
+    },
+  });
+
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -41,6 +62,7 @@ const OrderPage = async ({
           products={products}
           orderItemsData={orderItems}
           initialData={order}
+          productHires={productHires}
         />
       </div>
     </div>

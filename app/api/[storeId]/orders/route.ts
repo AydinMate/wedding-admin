@@ -10,14 +10,20 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { isPaid, hireDate, address, dropoffAddress, isDelivery, orderItems } =
-      body;
+    const {
+      isPaid,
+      hireDate,
+      address,
+      dropoffAddress,
+      isDelivery,
+      orderItems,
+    } = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
-    if (!isPaid) {
-      return new NextResponse("Is Paid is required", { status: 400 });
+    if (orderItems === "[]") {
+      return new NextResponse("Order items are required", { status: 400 });
     }
 
     if (!params.storeId) {
@@ -76,7 +82,6 @@ export async function POST(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
-
 
 export async function GET(
   req: Request,

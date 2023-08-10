@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import { Order } from "@prisma/client";
 import { CalendarIcon, GemIcon, Plus, Trash, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -74,16 +73,36 @@ interface OrderItem {
   id: string;
 }
 
+interface ProductHire {
+  productId: string;
+  hireDate: Date;
+  isPaid: boolean;
+  isCash: boolean;
+}
+
+interface Order {
+  id: string;
+  storeId: string;
+  isPaid: boolean;
+  isCash: boolean;
+
+  hireDate: Date;
+  dropoffAddress: string;
+  isDelivery: boolean;
+}
+
 interface OrderFormProps {
   initialData: Order | null;
   products: Product[];
   orderItemsData: OrderItem[];
+  productHires: ProductHire[];
 }
 
 export const OrderForm: React.FC<OrderFormProps> = ({
   initialData,
   products,
   orderItemsData,
+  productHires,
 }) => {
   const params = useParams();
   const router = useRouter();
@@ -116,8 +135,49 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         },
   });
 
+  const { setValue, watch } = form;
+
+  const hireDate = watch("hireDate");
+
+  const isProductHiredOnSelectedDate = (productId: string) => {
+    if (!hireDate) return false;
+
+    // Create the start and end of the selected date in UTC
+    const selectedDateStart = new Date(
+      Date.UTC(
+        hireDate.getUTCFullYear(),
+        hireDate.getUTCMonth(),
+        hireDate.getUTCDate(),
+        0,
+        0,
+        0,
+        0
+      )
+    );
+    const selectedDateEnd = new Date(
+      Date.UTC(
+        hireDate.getUTCFullYear(),
+        hireDate.getUTCMonth(),
+        hireDate.getUTCDate(),
+        23,
+        59,
+        59,
+        999
+      )
+    );
+
+    return productHires.some((productHire) => {
+      const productHireDate = new Date(productHire.hireDate);
+      return (
+        productHire.productId === productId &&
+        productHireDate >= selectedDateStart &&
+        productHireDate <= selectedDateEnd
+      );
+    });
+  };
+
   const onSubmit = async (data: OrderFormValues) => {
-console.log(data)
+    console.log(data);
     try {
       setLoading(true);
 
@@ -179,8 +239,6 @@ console.log(data)
     router.push(`/${params.storeId}/orders`);
     setLoading(false);
   };
-
-  const { setValue } = form;
 
   const addOrderItem = (product: Product) => {
     const orderId = Array.isArray(params.orderId)
@@ -251,7 +309,16 @@ console.log(data)
                               )}
                             >
                               {field.value ? (
-                                format(field.value, "PPP")
+                                format(
+                                  new Date(
+                                    Date.UTC(
+                                      field.value.getFullYear(),
+                                      field.value.getMonth(),
+                                      field.value.getDate()
+                                    )
+                                  ),
+                                  "PPP"
+                                )
                               ) : (
                                 <span>Pick a date</span>
                               )}
@@ -263,7 +330,19 @@ console.log(data)
                           <Calendar
                             mode="single"
                             selected={field.value}
-                            onSelect={field.onChange}
+                            onSelect={(selectedDate) => {
+                              if (selectedDate) {
+                                // Convert the selected date to UTC
+                                const utcDate = new Date(
+                                  Date.UTC(
+                                    selectedDate.getFullYear(),
+                                    selectedDate.getMonth(),
+                                    selectedDate.getDate()
+                                  )
+                                );
+                                field.onChange(utcDate);
+                              }
+                            }}
                             disabled={(date) => date < new Date()}
                             initialFocus
                           />
@@ -275,6 +354,7 @@ console.log(data)
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
               name="dropoffAddress"
@@ -398,6 +478,9 @@ console.log(data)
                                       >
                                         {!matchingItem ? (
                                           <Button
+                                            disabled={isProductHiredOnSelectedDate(
+                                              product.id
+                                            )}
                                             onClick={() =>
                                               addOrderItem(product)
                                             }

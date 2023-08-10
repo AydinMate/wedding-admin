@@ -125,6 +125,7 @@ model ProductHire {
   store     Store    @relation("StoreToHire", fields: [storeId], references: [id])
   hireDate  DateTime
   isPaid    Boolean  @default(false)
+  isCash    Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -139,6 +140,7 @@ model Order {
   store          Store         @relation("StoreToOrder", fields: [storeId], references: [id])
   orderItems     OrderItem[]
   isPaid         Boolean       @default(false)
+  isCash         Boolean       @default(false)
   phone          String        @default("")
   address        String        @default("")
   hireDate       DateTime
@@ -147,6 +149,7 @@ model Order {
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   productHires   ProductHire[]
+  price          Decimal       @default(0)
 
   @@index([storeId])
 }
