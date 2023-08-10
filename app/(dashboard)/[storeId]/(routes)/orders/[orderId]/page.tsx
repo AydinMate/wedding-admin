@@ -22,12 +22,24 @@ const OrderPage = async ({
     }
   });
 
+  const orderItems = await prismadb.orderItem.findMany({
+    where: {
+      orderId: params.orderId
+    },
+    select: {
+      productId: true,
+      orderId: true,
+      id: true
+    }
+  })
+
   
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
         <OrderForm
           products={products}
+          orderItemsData={orderItems}
           initialData={order}
         />
       </div>

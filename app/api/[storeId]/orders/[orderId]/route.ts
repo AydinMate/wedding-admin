@@ -33,13 +33,17 @@ export async function PATCH(
 
     const body = await req.json();
 
-    const { orderItems, isPaid, isDelivery, hireDate } = body;
+    // Ensure isPaid and isDelivery are booleans
+    const isPaidBool = body.isPaid === true || body.isPaid === 'true';
+    const isDeliveryBool = body.isDelivery === true || body.isDelivery === 'true';
+
+    const { orderItems: orderItemsData, hireDate } = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
 
-    if (!orderItems) {
+    if (!orderItemsData) {
       return new NextResponse("Name is required", { status: 400 });
     }
 
@@ -58,24 +62,35 @@ export async function PATCH(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    await prismadb.order.update({
+    // 1. Delete all OrderItem records associated with the Order
+    await prismadb.orderItem.deleteMany({
       where: {
-        id: params.orderId,
-      },
-      data: {
-        orderItems: {},
+        orderId: params.orderId,
       },
     });
 
+    // 2. Create new OrderItem records based on the provided data
+    const parsedOrderItems = JSON.parse(orderItemsData);
+    for (const item of parsedOrderItems) {
+      await prismadb.orderItem.create({
+        data: {
+          id: item.id,
+          orderId: item.orderId,
+          productId: item.productId,
+        },
+      });
+    }
+
+    // 3. Update the Order with the other fields
     const order = await prismadb.order.update({
       where: {
         id: params.orderId,
       },
       data: {
-        orderItems,
-        isPaid,
-        isDelivery,
+        isPaid: isPaidBool,
+        isDelivery: isDeliveryBool,
         hireDate,
+        dropoffAddress: body.dropoffAddress
       },
     });
 
@@ -85,6 +100,8 @@ export async function PATCH(
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
+
+
 
 export async function DELETE(
   req: Request,
