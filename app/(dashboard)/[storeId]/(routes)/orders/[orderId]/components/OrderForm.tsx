@@ -117,19 +117,16 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   });
 
   const onSubmit = async (data: OrderFormValues) => {
-    console.log("Submitting data:", data); // 1. Log the data being submitted
-
+console.log(data)
     try {
       setLoading(true);
 
       if (initialData) {
-        console.log("Updating order"); // 3. Check if it's updating an order
         await axios.patch(
           `/api/${params.storeId}/orders/${params.orderId}`,
           data
         );
       } else {
-        console.log("Creating new order"); // 3. Check if it's creating a new order
         await axios.post(`/api/${params.storeId}/orders`, data);
       }
 

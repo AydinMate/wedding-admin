@@ -10,20 +10,14 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { productId, isPaid, orderId, hireDate, address, dropoffAddress } = body;
+    const { isPaid, hireDate, address, dropoffAddress, isDelivery, orderItems } =
+      body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
-    if (!productId) {
-      return new NextResponse("Product ID is required", { status: 400 });
-    }
     if (!isPaid) {
       return new NextResponse("Is Paid is required", { status: 400 });
-    }
-
-    if (!orderId) {
-      return new NextResponse("Order Id is required", { status: 400 });
     }
 
     if (!params.storeId) {
@@ -43,14 +37,36 @@ export async function POST(
 
     const order = await prismadb.order.create({
       data: {
-        isPaid,
+        isPaid: isPaid,
         storeId: params.storeId,
-        hireDate,
-        address,
-        dropoffAddress,
-
+        hireDate: hireDate,
+        address: address,
+        dropoffAddress: dropoffAddress,
+        isDelivery: isDelivery,
       },
     });
+
+    // Handle orderItems (similar to PATCH request)
+    const parsedOrderItems = JSON.parse(orderItems);
+    for (const item of parsedOrderItems) {
+      await prismadb.orderItem.create({
+        data: {
+          id: item.id,
+          orderId: order.id, // Use the created order's ID
+          productId: item.productId,
+        },
+      });
+
+      await prismadb.productHire.create({
+        data: {
+          orderId: order.id, // Use the created order's ID
+          storeId: params.storeId,
+          hireDate: hireDate,
+          isPaid: isPaid,
+          productId: item.productId,
+        },
+      });
+    }
 
     const res = NextResponse.json(order);
 
@@ -60,6 +76,7 @@ export async function POST(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
 
 export async function GET(
   req: Request,
@@ -75,21 +92,17 @@ export async function GET(
     const orders = await prismadb.order.findMany({
       where: {
         storeId: params.storeId,
-  
       },
       orderBy: {
         createdAt: "desc",
       },
     });
 
-   const res = NextResponse.json(orders);
+    const res = NextResponse.json(orders);
 
-   return res;
- } catch (error) {
-   console.log("[ORDERS_GET]", error);
-   return new NextResponse("Internal error", { status: 500 });
- }
- 
+    return res;
+  } catch (error) {
+    console.log("[ORDERS_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
 }
-
-

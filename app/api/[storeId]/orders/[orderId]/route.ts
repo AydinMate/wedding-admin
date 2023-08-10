@@ -69,6 +69,12 @@ export async function PATCH(
       },
     });
 
+    await prismadb.productHire.deleteMany({
+      where: {
+        orderId: params.orderId,
+      },
+    });
+
     // 2. Create new OrderItem records based on the provided data
     const parsedOrderItems = JSON.parse(orderItemsData);
     for (const item of parsedOrderItems) {
@@ -78,7 +84,18 @@ export async function PATCH(
           orderId: item.orderId,
           productId: item.productId,
         },
-      });
+      })
+      
+      await prismadb.productHire.create({
+        data: {
+          orderId: item.orderId,
+          storeId: params.storeId,
+          hireDate: hireDate,
+          isPaid: isPaidBool,
+          productId: item.productId,
+
+        }
+      })
     }
 
     // 3. Update the Order with the other fields
