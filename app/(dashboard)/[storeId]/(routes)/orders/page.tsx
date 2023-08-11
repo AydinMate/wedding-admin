@@ -35,6 +35,7 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
       }, 0)
     ),
     isPaid: item.isPaid ? "Paid" : "Not Paid",
+    isCash: item.isCash ? "Cash" : "Not Cash",
     createdAt: format(item.createdAt, "MMM do, yyyy"),
     dropoffAddress: item.dropoffAddress,
     hireDate: format(item.hireDate, 'EEE MMM dd yyyy'),

@@ -27,6 +27,10 @@ export const columns: ColumnDef<HireColumn>[] = [
     header: "Paid",
   },
   {
+    accessorKey: "isCash",
+    header: "Cash",
+  },
+  {
     id: "actions",
     cell: ({ row }) => <CellAction data={row.original} />,
   },

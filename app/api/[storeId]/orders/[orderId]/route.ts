@@ -36,6 +36,7 @@ export async function PATCH(
     // Ensure isPaid and isDelivery are booleans
     const isPaidBool = body.isPaid === true || body.isPaid === 'true';
     const isDeliveryBool = body.isDelivery === true || body.isDelivery === 'true';
+    const isCashBool = body.isCash === true || body.isCash === 'true';
 
     const { orderItems: orderItemsData, hireDate } = body;
 
@@ -92,6 +93,7 @@ export async function PATCH(
           storeId: params.storeId,
           hireDate: hireDate,
           isPaid: isPaidBool,
+          isCash: isCashBool,
           productId: item.productId,
 
         }
@@ -106,6 +108,7 @@ export async function PATCH(
       data: {
         isPaid: isPaidBool,
         isDelivery: isDeliveryBool,
+        isCash: isCashBool,
         hireDate,
         dropoffAddress: body.dropoffAddress
       },

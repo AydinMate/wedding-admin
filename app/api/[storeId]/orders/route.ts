@@ -12,6 +12,7 @@ export async function POST(
 
     const {
       isPaid,
+      isCash,
       hireDate,
       address,
       dropoffAddress,
@@ -44,6 +45,7 @@ export async function POST(
     const order = await prismadb.order.create({
       data: {
         isPaid: isPaid,
+        isCash,
         storeId: params.storeId,
         hireDate: hireDate,
         address: address,
@@ -69,6 +71,7 @@ export async function POST(
           storeId: params.storeId,
           hireDate: hireDate,
           isPaid: isPaid,
+          isCash: isCash,
           productId: item.productId,
         },
       });

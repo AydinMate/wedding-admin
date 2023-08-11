@@ -10,7 +10,7 @@ export async function POST(
     const { userId } = auth();
     const body = await req.json();
 
-    const { productId, hireDate, isPaid, orderId } = body;
+    const { productId, hireDate, isPaid, orderId, isCash } = body;
 
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
@@ -21,8 +21,16 @@ export async function POST(
     if (!hireDate) {
       return new NextResponse("Hire Date is required", { status: 400 });
     }
-    if (!isPaid) {
-      return new NextResponse("Is Paid is required", { status: 400 });
+    if (typeof isPaid !== "boolean") {
+      return new NextResponse("Is Paid must be a boolean value", {
+        status: 400,
+      });
+    }
+
+    if (typeof isCash !== "boolean") {
+      return new NextResponse("Is Cash must be a boolean value", {
+        status: 400,
+      });
     }
 
     if (!orderId) {
@@ -49,6 +57,7 @@ export async function POST(
         productId,
         hireDate,
         isPaid,
+        isCash,
         storeId: params.storeId,
         orderId,
       },
@@ -58,9 +67,15 @@ export async function POST(
     const res = NextResponse.json(productHire);
 
     // Add the CORS headers to the response
-    res.headers.set('Access-Control-Allow-Origin', process.env.FRONTEND_STORE_URL!);
-    res.headers.set('Access-Control-Allow-Methods', 'GET,POST');
-    res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.headers.set(
+      "Access-Control-Allow-Origin",
+      process.env.FRONTEND_STORE_URL!
+    );
+    res.headers.set("Access-Control-Allow-Methods", "GET,POST");
+    res.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
 
     return res;
   } catch (error) {
@@ -78,7 +93,8 @@ export async function GET(
     const productId = searchParams.get("productId") || undefined;
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
-    const isPaid = searchParams.get("isPaid") === 'true'; // Convert the string to boolean
+    const isPaid = searchParams.get("isPaid") === "true";
+    const isCash = searchParams.get("isCash") === "true";
 
     if (!params.storeId) {
       return new NextResponse("Store ID is required", { status: 400 });
@@ -87,8 +103,12 @@ export async function GET(
     const productHires = await prismadb.productHire.findMany({
       where: {
         storeId: params.storeId,
-        ...(startDate && endDate && { hireDate: { gte: new Date(startDate), lte: new Date(endDate) } }), // Include hireDate in the where clause if both startDate and endDate are provided
+        ...(startDate &&
+          endDate && {
+            hireDate: { gte: new Date(startDate), lte: new Date(endDate) },
+          }), // Include hireDate in the where clause if both startDate and endDate are provided
         ...(isPaid && { isPaid }), // Include isPaid in the where clause if it's true
+        ...(isCash && { isCash }), // Include isCash in the where clause if it's true
       },
       include: {
         product: true,
@@ -98,19 +118,23 @@ export async function GET(
       },
     });
 
-   // Create a new response with the productHires data
-   const res = NextResponse.json(productHires);
+    // Create a new response with the productHires data
+    const res = NextResponse.json(productHires);
 
-   // Add the CORS headers to the response
-   res.headers.set('Access-Control-Allow-Origin', process.env.FRONTEND_STORE_URL!);
-   res.headers.set('Access-Control-Allow-Methods', 'GET,POST');
-   res.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    // Add the CORS headers to the response
+    res.headers.set(
+      "Access-Control-Allow-Origin",
+      process.env.FRONTEND_STORE_URL!
+    );
+    res.headers.set("Access-Control-Allow-Methods", "GET,POST");
+    res.headers.set(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization"
+    );
 
-   return res;
- } catch (error) {
-   console.log("[PRODUCT_HIRES_GET]", error);
-   return new NextResponse("Internal error", { status: 500 });
- }
+    return res;
+  } catch (error) {
+    console.log("[PRODUCT_HIRES_GET]", error);
+    return new NextResponse("Internal error", { status: 500 });
+  }
 }
-
-

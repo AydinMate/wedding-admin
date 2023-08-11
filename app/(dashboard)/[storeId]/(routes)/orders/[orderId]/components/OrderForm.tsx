@@ -52,6 +52,7 @@ const formSchema = z.object({
   orderId: z.any(),
   isDelivery: z.any(),
   isPaid: z.any(),
+  isCash: z.any(),
   orderItems: z.any(),
   dropoffAddress: z.string().max(64, "Maximum length is 64 characters"),
 
@@ -129,6 +130,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           hireDate: new Date(),
           isDelivery: false,
           isPaid: false,
+          isCash: true,
           orderId: "",
           orderItems: JSON.stringify(orderItems),
           dropoffAddress: "",
@@ -544,6 +546,34 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                 );
               })}
             </div>
+            <FormField
+              control={form.control}
+              name="isCash"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Is this a cash order?</FormLabel>
+                  <Select
+                    disabled={loading}
+                    onValueChange={(value) => {
+                      // Convert the string value back to boolean and call field.onChange
+                      field.onChange(value === "true");
+                    }}
+                    value={field.value ? "true" : "false"}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an option" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="true">Cash</SelectItem>
+                      <SelectItem value="false">Not Cash</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <input
               type="hidden"
               name="orderItems"

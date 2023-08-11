@@ -21,7 +21,8 @@ const HiresPage = async ({ params }: { params: { storeId: string } }) => {
     hireDate: format(item.hireDate, 'EEE MMM dd yyyy'),
     product: item.product.name,
     createdAt: format(item.createdAt, "MMM do, yyyy"),
-    isPaid: item.isPaid ? "Paid" : "Not Paid"
+    isPaid: item.isPaid ? "Paid" : "Not Paid",
+    isCash: item.isCash ? "Cash" : "Not Cash"
   }));
 
   return (

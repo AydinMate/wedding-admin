@@ -15,7 +15,6 @@ const OrderPage = async ({
       storeId: true,
       isPaid: true,
       isCash: true,
-
       hireDate: true,
       dropoffAddress: true,
       isDelivery: true,
