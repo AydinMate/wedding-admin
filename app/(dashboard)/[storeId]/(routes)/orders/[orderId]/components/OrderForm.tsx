@@ -128,7 +128,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
         }
       : {
           hireDate: new Date(),
-          isDelivery: false,
+          isDelivery: true,
           isPaid: false,
           isCash: true,
           orderId: "",
@@ -304,6 +304,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
+                            disabled={loading}
                               variant={"outline"}
                               className={cn(
                                 "w-[240px] pl-3 text-left font-normal",
@@ -343,6 +344,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                                   )
                                 );
                                 field.onChange(utcDate);
+                                setOrderItems([]);
                               }
                             }}
                             disabled={(date) => date < new Date()}
@@ -365,6 +367,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   <FormLabel>Delivery address</FormLabel>
                   <FormControl>
                     <Input
+                      autoComplete="off"
                       disabled={loading}
                       placeholder="123 Fake st"
                       {...field}
@@ -400,7 +403,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="true">Delivery</SelectItem>
-                      <SelectItem value="false">Pickup</SelectItem>
+                      <SelectItem value="false">Pick up</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -449,6 +452,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
+                              disabled={loading}
                               variant={"outline"}
                               className={cn(
                                 "w-[240px] pl-3 text-left font-normal",
@@ -530,6 +534,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                   <div className="" key={item.id}>
                     <div className="flex items-center mt-2">
                       <Button
+                        disabled={loading}
                         onClick={() => removeOrderItem(item.id)}
                         variant={"ghost"}
                         size={"icon"}
