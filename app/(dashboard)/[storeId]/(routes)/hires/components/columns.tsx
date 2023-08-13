@@ -9,6 +9,7 @@ export type HireColumn = {
   createdAt: string;
   hireDate: string;
   isPaid: string;
+  orderId: string;
 };
 
 

@@ -18,6 +18,7 @@ export async function POST(
       dropoffAddress,
       isDelivery,
       orderItems,
+      customerName
     } = body;
 
     if (!userId) {
@@ -51,6 +52,7 @@ export async function POST(
         address: address,
         dropoffAddress: dropoffAddress,
         isDelivery: isDelivery,
+        customerName: customerName
       },
     });
 

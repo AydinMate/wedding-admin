@@ -39,7 +39,8 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     createdAt: format(item.createdAt, "MMM do, yyyy"),
     dropoffAddress: item.dropoffAddress,
     hireDate: format(item.hireDate, 'EEE MMM dd yyyy'),
-    isDelivery: item.isDelivery ? "Delivery" : "Pickup"
+    isDelivery: item.isDelivery ? "Delivery" : "Pickup",
+    customerName: item.customerName
   }));
 
   return (

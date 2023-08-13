@@ -110,7 +110,8 @@ export async function PATCH(
         isDelivery: isDeliveryBool,
         isCash: isCashBool,
         hireDate,
-        dropoffAddress: body.dropoffAddress
+        dropoffAddress: body.dropoffAddress,
+        customerName: body.customerName,
       },
     });
 

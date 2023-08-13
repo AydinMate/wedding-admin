@@ -29,12 +29,21 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
 
   const { toast } = useToast();
 
-  const onCopy = (id: string) => {
+  const onCopyHire = (id: string) => {
     navigator.clipboard.writeText(id);
     toast({
       variant: "default",
       title: "Success!",
       description: "Hire ID copied to the clipboard.",
+    });
+  };
+
+  const onCopyOrder = (id: string) => {
+    navigator.clipboard.writeText(id);
+    toast({
+      variant: "default",
+      title: "Success!",
+      description: "Order ID copied to the clipboard.",
     });
   };
 
@@ -52,7 +61,7 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
       toast({
         variant: "destructive",
         title: "Uh oh.",
-        description: "Something went wrong. (app/(dashboard)/[storeId]/(routes)/hires/components/cell-action.tsx)",
+        description: "Something went wrong.",
       });
     } finally {
       setLoading(false);
@@ -76,17 +85,15 @@ export const CellAction: React.FC<CellActionProps> = ({ data }) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => onCopy(data.id)}>
+          <DropdownMenuItem onClick={() => onCopyHire(data.id)}>
             <Copy className="mr-2 h-4 w-4" />
-            Copy ID
+            Copy Hire ID
           </DropdownMenuItem>
           <DropdownMenuItem
-            onClick={() =>
-              router.push(`/${params.storeId}/hires/${data.id}`)
-            }
+            onClick={() => onCopyOrder(data.orderId)}
           >
-            <Edit className="mr-2 h-4 w-4" />
-            Update
+            <Copy className="mr-2 h-4 w-4" />
+            Copy Order ID
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setOpen(true)}>
             <Trash className="mr-2 h-4 w-4" />

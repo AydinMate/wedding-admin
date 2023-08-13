@@ -8,7 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { CalendarIcon, GemIcon, Plus, Trash, X } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { FormEvent, useState } from "react";
+import React, { useState } from "react";
 
 import {
   Form,
@@ -29,7 +29,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
@@ -55,6 +54,7 @@ const formSchema = z.object({
   isCash: z.any(),
   orderItems: z.any(),
   dropoffAddress: z.string().max(64, "Maximum length is 64 characters"),
+  customerName: z.string().max(64, "Maximum length is 64 characters"),
 
   hireDate: z.date({
     required_error: "A hire date is required.",
@@ -90,6 +90,7 @@ interface Order {
   hireDate: Date;
   dropoffAddress: string;
   isDelivery: boolean;
+  customerName: string;
 }
 
 interface OrderFormProps {
@@ -134,6 +135,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
           orderId: "",
           orderItems: JSON.stringify(orderItems),
           dropoffAddress: "",
+          customerName: "",
         },
   });
 
@@ -179,7 +181,6 @@ export const OrderForm: React.FC<OrderFormProps> = ({
   };
 
   const onSubmit = async (data: OrderFormValues) => {
-    console.log(data);
     try {
       setLoading(true);
 
@@ -304,7 +305,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                            disabled={loading}
+                              disabled={loading}
                               variant={"outline"}
                               className={cn(
                                 "w-[240px] pl-3 text-left font-normal",
@@ -369,7 +370,7 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                     <Input
                       autoComplete="off"
                       disabled={loading}
-                      placeholder="123 Fake st"
+                      placeholder="Enter an address..."
                       {...field}
                     />
                   </FormControl>
@@ -575,6 +576,24 @@ export const OrderForm: React.FC<OrderFormProps> = ({
                       <SelectItem value="false">Not Cash</SelectItem>
                     </SelectContent>
                   </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="customerName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Customer Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      autoComplete="off"
+                      disabled={loading}
+                      placeholder="Enter a name..."
+                      {...field}
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

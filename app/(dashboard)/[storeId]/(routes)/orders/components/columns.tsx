@@ -46,13 +46,14 @@ export const columns: ColumnDef<OrderColumn>[] = [
     header: "Total Price",
   },
   {
+    accessorKey: "customerName",
+    header: "Customer Name",
+  },
+  {
     accessorKey: "phone",
     header: "Phone",
   },
-  {
-    accessorKey: "address",
-    header: "Billing Address",
-  },
+
   {
     id: "actions",
     cell: ({ row }) => <CellAction data={row.original} />,

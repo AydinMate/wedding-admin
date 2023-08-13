@@ -150,6 +150,7 @@ model Order {
   updatedAt      DateTime      @updatedAt
   productHires   ProductHire[]
   price          Decimal       @default(0)
+  customerName   String        @default("")
 
   @@index([storeId])
 }

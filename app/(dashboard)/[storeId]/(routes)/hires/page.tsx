@@ -22,7 +22,8 @@ const HiresPage = async ({ params }: { params: { storeId: string } }) => {
     product: item.product.name,
     createdAt: format(item.createdAt, "MMM do, yyyy"),
     isPaid: item.isPaid ? "Paid" : "Not Paid",
-    isCash: item.isCash ? "Cash" : "Not Cash"
+    isCash: item.isCash ? "Cash" : "Not Cash",
+    orderId: item.orderId
   }));
 
   return (

@@ -18,6 +18,7 @@ const OrderPage = async ({
       hireDate: true,
       dropoffAddress: true,
       isDelivery: true,
+      customerName: true
     },
   });
 
