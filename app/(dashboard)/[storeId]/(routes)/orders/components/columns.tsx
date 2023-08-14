@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { CellAction } from "./cell-action";
+import { IdAction } from "./id-action";
 
 export type OrderColumn = {
   id: string;
@@ -17,6 +18,11 @@ export type OrderColumn = {
 };
 
 export const columns: ColumnDef<OrderColumn>[] = [
+  {
+    accessorKey: "id",
+    header: "Order Id",
+    cell: ({ row }) => <IdAction data={row.original} />,
+  },
   {
     accessorKey: "products",
     header: "Products",

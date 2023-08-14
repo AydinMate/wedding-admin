@@ -1,9 +1,20 @@
 import Stripe from "stripe";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-
+import { PickUpEmail } from "@/emails/PickUpEmail";
 import { stripe } from "@/lib/stripe";
 import prismadb from "@/lib/prismadb";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const formatter = new Intl.DateTimeFormat("en-US", {
+  weekday: "long",
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
 
 export async function POST(req: Request) {
   const body = await req.text();
@@ -37,8 +48,9 @@ export async function POST(req: Request) {
   const addressString = addressComponents.filter((c) => c !== null).join(", ");
 
   if (event.type === "checkout.session.completed") {
+    console.log("Session", session);
+
     const orderId = session?.metadata?.orderId;
-    console.log(orderId);
 
     // Update the order
     const order = await prismadb.order.update({
@@ -65,6 +77,54 @@ export async function POST(req: Request) {
         isPaid: true,
       },
     });
+
+    const productIds = order.orderItems.map((item) => item.productId);
+
+    const products = await prismadb.product.findMany({
+      where: {
+        id: {
+          in: productIds,
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        colour: true,
+        size: true,
+        price: true,
+        images: true
+      },
+    });
+
+    const formattedProducts = products.map(product => ({
+      ...product,
+      colour: product.colour.name,
+      size: product.size.name,
+      price: Number(product.price),
+      images: product.images[0].url,
+    }));
+    
+
+    const formattedHireDate = formatter.format(order.hireDate);
+
+    if (!order.isDelivery) {
+      const pickUpEmail = await resend.emails.send({
+        from: "bu@resend.dev",
+        to: session?.customer_details?.email || "",
+        subject: "Receipt for Your Payment",
+        react: PickUpEmail({
+          hireDate: formattedHireDate,
+          orderId: orderId,
+          city: session?.customer_details?.address?.city,
+          country: session?.customer_details?.address?.country,
+          customerName: session?.customer_details?.name,
+          line1: session?.customer_details?.address?.line1,
+          postalCode: session?.customer_details?.address?.postal_code,
+          state: session?.customer_details?.address?.state,
+          products: formattedProducts
+        }),
+      });
+    }
   }
 
   return new NextResponse(null, { status: 200 });

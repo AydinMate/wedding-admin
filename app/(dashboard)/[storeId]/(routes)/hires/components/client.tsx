@@ -19,7 +19,7 @@ export const HireClient: React.FC<HireClientProps> = ({ data }) => {
         description="Manage hires for your store"
       />
       <Separator />
-      <DataTable columns={columns} data={data} searchKey="hireDate" />
+      <DataTable placeholder="Enter Hire Date..." columns={columns} data={data} searchKey="hireDate" />
       <Heading title="API" description="API calls for Hires" />
       <Separator />
       <ApiList entityIdName="hireId" entityName="hires" />
