@@ -19,6 +19,8 @@ const nowInAEST = new Date(
   new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" })
 );
 
+// test
+
 const formatter = new Intl.DateTimeFormat("en-US", {
   weekday: "long",
   day: "numeric",
