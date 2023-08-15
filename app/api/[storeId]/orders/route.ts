@@ -2,6 +2,12 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+}
+
 export async function POST(
   req: Request,
   { params }: { params: { storeId: string } }
@@ -43,6 +49,26 @@ export async function POST(
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
+    const parsedOrderItems = JSON.parse(orderItems);
+
+    const productIds = parsedOrderItems.map(
+      (item: OrderItem) => item.productId
+    );
+
+    // Find products using prismadb (assuming it returns a promise)
+    const products = await prismadb.product.findMany({
+      where: {
+        id: {
+          in: productIds,
+        },
+      },
+    });
+
+    // Calculate the total price
+    const totalPrice = products
+      .map((product) => product.price.toNumber()) // Convert Decimal to number if needed
+      .reduce((acc, curr) => acc + curr, 0);
+
     const order = await prismadb.order.create({
       data: {
         isPaid: isPaid,
@@ -52,12 +78,13 @@ export async function POST(
         address: address,
         dropoffAddress: dropoffAddress,
         isDelivery: isDelivery,
-        customerName: customerName
+        customerName: customerName,
+        price: totalPrice
       },
     });
 
     // Handle orderItems (similar to PATCH request)
-    const parsedOrderItems = JSON.parse(orderItems);
+    
     for (const item of parsedOrderItems) {
       await prismadb.orderItem.create({
         data: {

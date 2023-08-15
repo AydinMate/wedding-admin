@@ -9,7 +9,6 @@ interface ProductHire {
   hireDate: string;
 }
 
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -35,7 +34,9 @@ export async function POST(
   const products = await prismadb.product.findMany({
     where: {
       id: {
-        in: productHires.map((productHire: ProductHire) => productHire.productId),
+        in: productHires.map(
+          (productHire: ProductHire) => productHire.productId
+        ),
       },
     },
   });
@@ -55,6 +56,11 @@ export async function POST(
     });
   });
 
+  const orderPrice = products
+  .map((product) => product.price.toNumber())
+  .reduce((acc, curr) => acc + curr, 0);
+
+
   const order = await prismadb.order.create({
     data: {
       storeId: params.storeId,
@@ -62,38 +68,27 @@ export async function POST(
       hireDate: new Date(body.hireDate), // assign hireDate to order here
       dropoffAddress: body.dropoffAddress,
       isDelivery: body.isDelivery,
+      price: orderPrice,
       orderItems: {
         create: body.productHires.map((productHire: ProductHire) => ({
           product: { connect: { id: productHire.productId } },
         })),
       },
     },
-});
+  });
 
-await Promise.all(
-  body.productHires.map((productHire: ProductHire) =>
-    prismadb.productHire.create({
-      data: {
-        productId: productHire.productId,
-        storeId: params.storeId,
-        hireDate: new Date(productHire.hireDate),
-        orderId: order.id, // assign the orderId here
-      },
-    })
-  )
-);
-
-
-
-
-  // await prismadb.productHire.createMany({
-  //   data: productHires.map((productHire: ProductHire) => ({
-  //     productId: productHire.productId,
-  //     storeId: params.storeId,
-  //     hireDate: new Date(productHire.hireDate),
-  //   })),
-  // });
-
+  await Promise.all(
+    body.productHires.map((productHire: ProductHire) =>
+      prismadb.productHire.create({
+        data: {
+          productId: productHire.productId,
+          storeId: params.storeId,
+          hireDate: new Date(productHire.hireDate),
+          orderId: order.id,
+        },
+      })
+    )
+  );
 
   const session = await stripe.checkout.sessions.create({
     line_items,

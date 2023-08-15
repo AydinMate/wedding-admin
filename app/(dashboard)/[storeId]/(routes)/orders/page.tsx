@@ -29,18 +29,14 @@ const OrdersPage = async ({ params }: { params: { storeId: string } }) => {
     products: item.orderItems
       .map((orderItem) => orderItem.product.name)
       .join(", "),
-    totalPrice: formatter.format(
-      item.orderItems.reduce((total, item) => {
-        return total + Number(item.product.price);
-      }, 0)
-    ),
     isPaid: item.isPaid ? "Paid" : "Not Paid",
     isCash: item.isCash ? "Cash" : "Not Cash",
     createdAt: format(item.createdAt, "MMM do, yyyy"),
     dropoffAddress: item.dropoffAddress,
     hireDate: format(item.hireDate, 'EEE MMM dd yyyy'),
     isDelivery: item.isDelivery ? "Delivery" : "Pickup",
-    customerName: item.customerName
+    customerName: item.customerName,
+    totalPrice: formatter.format(item.price.toNumber()),
   }));
 
   return (

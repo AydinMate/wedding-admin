@@ -13,7 +13,6 @@ import {
   Text,
 } from "@react-email/components";
 import * as React from "react";
-import { StringLiteral } from "typescript";
 
 const nowInAEST = new Date(
   new Date().toLocaleString("en-US", { timeZone: "Australia/Sydney" })
@@ -42,7 +41,7 @@ type Product = {
   images: string;
 };
 
-interface PickUpEmailProps {
+interface InvoiceEmailProps {
   hireDate: string;
   orderId: string | undefined;
   customerName: string | null | undefined;
@@ -52,9 +51,12 @@ interface PickUpEmailProps {
   postalCode: string | null | undefined;
   country: string | null | undefined;
   products: Array<Product>;
+  orderPrice: number;
+  isDelivery: boolean;
+  dropoffAddressParts: string[];
 }
 
-export const PickUpEmail = ({
+export const InvoiceEmail = ({
   hireDate,
   orderId,
   customerName,
@@ -63,8 +65,11 @@ export const PickUpEmail = ({
   country,
   postalCode,
   state,
-  products
-}: PickUpEmailProps) => (
+  products,
+  orderPrice,
+  isDelivery,
+  dropoffAddressParts,
+}: InvoiceEmailProps) => (
   <Html>
     <Head />
     <Preview>Diamond Wedding Hire Receipt</Preview>
@@ -73,7 +78,14 @@ export const PickUpEmail = ({
       <Container style={container}>
         <Section>
           <Column>
-            <Img src={""} width="42" height="42" alt="Apple Logo" />
+            <Img
+              src={
+                "https://png.pngtree.com/png-vector/20190419/ourmid/pngtree-vector-diamond-icon-png-image_956688.jpg"
+              }
+              width="42"
+              height="42"
+              alt="Apple Logo"
+            />
           </Column>
 
           <Column align="right" style={tableCell}>
@@ -87,7 +99,9 @@ export const PickUpEmail = ({
               <Row>
                 <Column style={informationTableColumn}>
                   <Text style={informationTableLabel}>HIRE TYPE</Text>
-                  <Text style={informationTableValue}>PICK UP</Text>
+                  <Text style={informationTableValue}>
+                    {isDelivery ? "DELIVERY" : "PICK UP"}
+                  </Text>
                 </Column>
               </Row>
               <Row>
@@ -131,27 +145,26 @@ export const PickUpEmail = ({
         </Section>
         {products.map((product) => (
           <Section key={product.id} style={{ marginBottom: "16px" }}>
-            <Column style={{ width: '64px' }}>
-            <Img
-              src={product.images}
-              width="64"
-              height="64"
-              alt={product.name}
-              style={productIcon}
-            />
-          </Column>
-          <Column style={{ paddingLeft: "22px" }}>
-            <Text style={productTitle}>{product.name}</Text>
-            <Text style={productDescription}>Colour: {product.colour}</Text>
-            <Text style={productDescription}>Size: {product.size}</Text>
-          </Column>
-          <Column style={productPriceWrapper} align="right">
-            <Text style={productPrice}>${product.price}</Text>
-          </Column>
-        </Section>
+            <Column style={{ width: "64px" }}>
+              <Img
+                src={product.images}
+                width="64"
+                height="64"
+                alt={product.name}
+                style={productIcon}
+              />
+            </Column>
+            <Column style={{ paddingLeft: "22px" }}>
+              <Text style={productTitle}>{product.name}</Text>
+              <Text style={productDescription}>Colour: {product.colour}</Text>
+              <Text style={productDescription}>Size: {product.size}</Text>
+            </Column>
+            <Column style={productPriceWrapper} align="right">
+              <Text style={productPrice}>${product.price}</Text>
+            </Column>
+          </Section>
         ))}
-        
-        
+
         <Hr style={productPriceLine} />
         <Section align="right">
           <Column style={tableCell} align="right">
@@ -159,30 +172,55 @@ export const PickUpEmail = ({
           </Column>
           <Column style={productPriceVerticalLine}></Column>
           <Column style={productPriceLargeWrapper}>
-            <Text style={productPriceLarge}>$14.99</Text>
+            <Text style={productPriceLarge}>${orderPrice}</Text>
           </Column>
         </Section>
         <Hr style={productPriceLineBottom} />
         <Section>
           <Column align="center" style={ctaTitle}>
-            <Text style={ctaText}>Please Pick Up From:</Text>
-          </Column>
-        </Section>
-        <Section>
-          <Column align="center" style={walletWrapper}>
-            <Text style={productTitle}>123 Fake st</Text>
-            <Text style={productTitle}>Melbourne Vic</Text>
-            <Text style={productTitle}>3000, Australia</Text>
-            <Hr style={walletBottomLine} />
-
-            <Text style={footerText}>
-              Kindly be informed that your pickup is scheduled for 12PM on date.
-              Items should be returned by 10AM the subsequent day to avoid extra
-              charges. If you require any adjustments to this schedule, please
-              reach out to our support team in advance.
+            <Text style={ctaText}>
+              {isDelivery
+                ? "Your order will be delivered to:"
+                : "Please Pick Up From:"}
             </Text>
           </Column>
         </Section>
+        {isDelivery ? (
+          <Section>
+            <Column align="center" style={walletWrapper}>
+              {dropoffAddressParts.map((part, index) => (
+                <Text key={index} style={productTitle}>
+                  {part}
+                </Text>
+              ))}
+              <Hr style={walletBottomLine} />
+
+              <Text style={footerText}>
+                Kindly be informed that your delivery is scheduled for 12PM on{" "}
+                {hireDate}. Items are expected to be ready for pickup by 10AM
+                the following day. If you require any adjustments to this
+                schedule, please reach out to our support team in advance.
+              </Text>
+            </Column>
+          </Section>
+        ) : (
+          <Section>
+            <Column align="center" style={walletWrapper}>
+              <Text style={productTitle}>123 Fake st</Text>
+              <Text style={productTitle}>Melbourne VIC 3000</Text>
+              <Text style={productTitle}>Australia</Text>
+              <Hr style={walletBottomLine} />
+
+              <Text style={footerText}>
+                Kindly be informed that your pickup is scheduled for 12PM on{" "}
+                {hireDate}. Items should be returned by 10AM the subsequent day
+                to avoid extra charges. If you require any adjustments to this
+                schedule, please reach out to our support team in advance.
+              </Text>
+            </Column>
+          </Section>
+        )}
+
         <Hr style={walletBottomLine} />
 
         <Text style={footerLinksWrapper}>
@@ -203,7 +241,7 @@ export const PickUpEmail = ({
   </Html>
 );
 
-export default PickUpEmail;
+export default InvoiceEmail;
 
 const main = {
   fontFamily: '"Helvetica Neue",Helvetica,Arial,sans-serif',

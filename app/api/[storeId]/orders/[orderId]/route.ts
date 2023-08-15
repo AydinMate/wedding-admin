@@ -2,6 +2,12 @@ import prismadb from "@/lib/prismadb";
 import { auth } from "@clerk/nextjs";
 import { NextResponse } from "next/server";
 
+interface OrderItem {
+  id: string;
+  orderId: string;
+  productId: string;
+}
+
 export async function GET(
   req: Request,
   { params }: { params: { orderId: string } }
@@ -33,10 +39,13 @@ export async function PATCH(
 
     const body = await req.json();
 
+    console.log("Order ID API Body: ", body);
+
     // Ensure isPaid and isDelivery are booleans
-    const isPaidBool = body.isPaid === true || body.isPaid === 'true';
-    const isDeliveryBool = body.isDelivery === true || body.isDelivery === 'true';
-    const isCashBool = body.isCash === true || body.isCash === 'true';
+    const isPaidBool = body.isPaid === true || body.isPaid === "true";
+    const isDeliveryBool =
+      body.isDelivery === true || body.isDelivery === "true";
+    const isCashBool = body.isCash === true || body.isCash === "true";
 
     const { orderItems: orderItemsData, hireDate } = body;
 
@@ -85,8 +94,8 @@ export async function PATCH(
           orderId: item.orderId,
           productId: item.productId,
         },
-      })
-      
+      });
+
       await prismadb.productHire.create({
         data: {
           orderId: item.orderId,
@@ -95,10 +104,27 @@ export async function PATCH(
           isPaid: isPaidBool,
           isCash: isCashBool,
           productId: item.productId,
-
-        }
-      })
+        },
+      });
     }
+
+    const productIds = parsedOrderItems.map(
+      (item: OrderItem) => item.productId
+    );
+
+    // Find products using prismadb (assuming it returns a promise)
+    const products = await prismadb.product.findMany({
+      where: {
+        id: {
+          in: productIds,
+        },
+      },
+    });
+
+    // Calculate the total price
+    const totalPrice = products
+      .map((product) => product.price.toNumber()) // Convert Decimal to number if needed
+      .reduce((acc, curr) => acc + curr, 0);
 
     // 3. Update the Order with the other fields
     const order = await prismadb.order.update({
@@ -112,6 +138,7 @@ export async function PATCH(
         hireDate,
         dropoffAddress: body.dropoffAddress,
         customerName: body.customerName,
+        price: totalPrice
       },
     });
 
@@ -121,8 +148,6 @@ export async function PATCH(
     return new NextResponse("Internal Error", { status: 500 });
   }
 }
-
-
 
 export async function DELETE(
   req: Request,
