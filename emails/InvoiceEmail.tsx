@@ -225,7 +225,7 @@ export const InvoiceEmail = ({
 
         <Text style={footerLinksWrapper}>
           <Link href="https://www.apple.com/legal/itunes/us/sales.html">
-            Terms of Hire
+            Terms &amp; Conditions
           </Link>{" "}
           •{" "}
           <Link href="https://www.apple.com/legal/privacy/">
