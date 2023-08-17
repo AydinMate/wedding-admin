@@ -4,7 +4,10 @@ export const getSalesCount = async (storeId: string) => {
   const salesCount = await prismadb.order.count({
     where: {
       storeId,
-      isPaid: true,
+      OR: [
+        { isPaid: true },
+        { isCash: true }
+      ]
     },
   });
 

@@ -39,7 +39,6 @@ export async function PATCH(
 
     const body = await req.json();
 
-    console.log("Order ID API Body: ", body);
 
     // Ensure isPaid and isDelivery are booleans
     const isPaidBool = body.isPaid === true || body.isPaid === "true";

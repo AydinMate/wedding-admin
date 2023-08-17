@@ -5,11 +5,12 @@ import { getTotalRevenue } from "@/actions/getTotalRevenue";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heading } from "@/components/ui/heading";
 import { Separator } from "@/components/ui/separator";
-import prismadb from "@/lib/prismadb";
 import { formatter } from "@/lib/utils";
 import { CreditCard, DollarSign, Package } from "lucide-react";
 import { FC } from "react";
 import { getGraphRevenue } from "@/actions/getGraphRevenue";
+import OrderCards from "@/components/OrderCards";
+import { getThisWeeksOrders } from "@/actions/getThisWeeksOrders";
 
 interface DashboardPageProps {
   params: { storeId: string };
@@ -20,6 +21,7 @@ const DashboardPage: FC<DashboardPageProps> = async ({ params }) => {
   const salesCount = await getSalesCount(params.storeId);
   const stockCount = await getStockCount(params.storeId);
   const graphRevenue = await getGraphRevenue(params.storeId);
+  const thisWeeksOrders = await getThisWeeksOrders(params.storeId);
   return (
     <div className="flex-col">
       <div className="flex-1 space-y-4 p-8 pt-6">
@@ -42,7 +44,7 @@ const DashboardPage: FC<DashboardPageProps> = async ({ params }) => {
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Sales</CardTitle>
+              <CardTitle className="text-sm font-medium">Hires</CardTitle>
 
               <CreditCard className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
@@ -71,6 +73,13 @@ const DashboardPage: FC<DashboardPageProps> = async ({ params }) => {
             <Overview data={graphRevenue} />
           </CardContent>
         </Card>
+      </div>
+      <div className="flex-1 space-y-4 p-8 pt-6">
+        <Separator />
+        <Heading title="Orders" description="This week's orders" />
+        <div className="flex flex-col">
+          <OrderCards orders={thisWeeksOrders}/>
+        </div>
       </div>
     </div>
   );

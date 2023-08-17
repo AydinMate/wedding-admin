@@ -9,27 +9,20 @@ export const getGraphRevenue = async (storeId: string) => {
   const paidOrders = await prismadb.order.findMany({
     where: {
       storeId,
-      isPaid: true,
+      OR: [
+        { isPaid: true },
+        { isCash: true }
+      ]
     },
-    include: {
-      orderItems: {
-        include: {
-          product: true,
-        },
-      },
-    },
-    
   });
 
   const monthlyRevenue: { [key: number]: number } = {};
 
   for (const order of paidOrders) {
-    const month = order.createdAt.getMonth();
-    let revenueForOrder = 0;
+    const month = order.hireDate.getMonth();
+    const revenueForOrder = order.price.toNumber();
 
-    for (const item of order.orderItems) {
-      revenueForOrder += item.product.price.toNumber();
-    }
+    
 
     monthlyRevenue[month] = (monthlyRevenue[month] || 0) + revenueForOrder;
   }
